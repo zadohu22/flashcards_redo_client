@@ -1,43 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signUpUsers } from '../../api/signUpUser';
+import { showAllUsers } from '../../api/showAllUsers';
 
 const Signup = () => {
 	const navigate = useNavigate();
 	const [email, setEmail] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	const [confirmPassword, setConfirmPassword] = useState<string>('');
+	const [errorMessage, setErrorMessage] = useState<string>('');
+	// const [passwordsMatch, setPasswordsMatch] = useState<boolean>(false);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		// -- TODO -- handle password !== confirmPassword
 		try {
-			const response = await fetch('http://localhost:3000/create-user', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Accept: 'application/json',
-				},
-				body: JSON.stringify({
-					email,
-					password,
-					confirmPassword,
-				}),
-			});
-			const data = await response.json();
-			console.log(data);
+			await signUpUsers({ email, password, confirmPassword });
+			// If sign up succeeds, you can navigate the user to another page
+			navigate('/login'); // Replace '/success' with the desired success page
 		} catch (error) {
-			console.error('Error:', error);
+			if (error instanceof Error) {
+				console.log(error, 'error from signup component');
+				setErrorMessage(error.message);
+			} else {
+				setErrorMessage('An unknown error occurred');
+			}
 		}
-	};
-
-	const handleShowAll = async () => {
-		try {
-			const response = await fetch('http://localhost:3000/show-all-users');
-			const data = await response.json();
-			console.log(data);
-		} catch (error) {
-			console.log('Error fetching users:', error);
-		}
+		console.log(errorMessage, 'error message state');
 	};
 
 	return (
@@ -77,8 +65,13 @@ const Signup = () => {
 				>
 					Login
 				</p>
+				{errorMessage && (
+					<div>
+						<p className='text-red-500'>{errorMessage}</p>
+					</div>
+				)}
 			</div>
-			<button onClick={handleShowAll}>Show all users</button>
+			<button onClick={showAllUsers}>Show all users</button>
 		</div>
 	);
 };
