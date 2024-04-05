@@ -19,6 +19,7 @@ export const login = async ({ email, password }: loginI) => {
 			throw new Error(errorData.error || 'Failed to sign up');
 		}
 		const data = await response.json();
+		sessionStorage.setItem('token', data.token);
 		console.log(data);
 	} catch (error) {
 		if (error instanceof Error) {
